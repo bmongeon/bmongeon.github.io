@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blake's Lawncare Manager</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #1f2937, #111827);
+      color: #111827;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .lock-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .lock-card {
+      width: 100%;
+      max-width: 360px;
+      background: rgba(255,255,255,0.96);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+      text-align: center;
+    }
+
+    .lock-title {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .lock-subtitle {
+      margin: 0 0 18px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .lock-card input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      font-size: 20px;
+      text-align: center;
+      letter-spacing: 6px;
+      margin-bottom: 12px;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .topbar {
+      color: white;
+      margin-bottom: 18px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: #d1d5db;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .income-value {
+      font-size: 34px;
+      font-weight: 900;
+      color: #16a34a;
+    }
+
+    .planner-list,
+    .today-jobs,
+    .customers-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .planner-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 600;
+    }
+
+    .planner-count {
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    form .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      background: white;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    .job-card,
+    .customer-card {
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .job-card {
+      background: linear-gradient(180deg, #ecfdf5, #f0fdf4);
+      border-left: 6px solid #22c55e;
+    }
+
+    .customer-card {
+      background: #fafafa;
+    }
+
+    .customer-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .customer-name {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badge-blue {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-green {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge-yellow {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .badge-red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .details {
+      display: grid;
+      gap: 6px;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      opacity: 0.94;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-green {
+      background: #22c55e;
+      color: white;
+    }
+
+    .btn-blue {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-yellow {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-red {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-dark {
+      background: #111827;
+      color: white;
+    }
+
+    .btn-gray {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .empty {
+      color: #6b7280;
+      font-weight: 600;
+      padding: 8px 0;
+    }
+
+    .error {
+      color: #dc2626;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      min-height: 20px;
+    }
+
+    .work-mode {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .work-card {
+      background: rgba(255,255,255,0.98);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+    }
+
+    .work-card h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+    }
+
+    .work-job {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+
+    .work-progress {
+      color: #6b7280;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 720px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+
+      .app,
+      .work-mode {
+        padding: 14px;
+      }
+
+      .topbar h1 {
+        font-size: 26px;
+      }
+
+      .actions button {
+        flex: 1 1 calc(50% - 8px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOCK SCREEN -->
+  <div id="lockScreen" class="lock-screen">
+    <div class="lock-card">
+      <h1 class="lock-title">🔒 Lawncare Manager</h1>
+      <p class="lock-subtitle">Enter your PIN to access the app</p>
+      <input type="password" id="pinInput" maxlength="4" placeholder="PIN" />
+      <button class="btn-green" style="width:100%;" onclick="unlock()">Unlock</button>
+      <div id="pinError" class="error"></div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="app hidden">
+    <div class="topbar">
+      <h1>🌿 Blake's Lawncare Manager</h1>
+      <p>Track customers, due dates, routes, and completed jobs.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">Monthly Income</div>
+        <div class="income-value">$<span id="income">0</span></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Weekly Planner</div>
+        <div id="weekView" class="planner-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Today's Jobs (<span id="jobCount">0</span>)</div>
+        <div class="actions" style="margin-bottom:14px;">
+          <button class="btn-blue" onclick="startWorkDay()">Start Work Day</button>
+        </div>
+        <div id="todayJobs" class="today-jobs"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Add Customer</div>
+
+        <form id="customerForm">
+          <div>
+            <label for="name">Customer Name</label>
+            <input id="name" type="text" required />
+          </div>
+
+          <div>
+            <label for="phone">Phone</label>
+            <input id="phone" type="text" />
+          </div>
+
+          <div class="full">
+            <label for="address">Address</label>
+            <input id="address" type="text" required />
+          </div>
+
+          <div>
+            <label for="price">Price</label>
+            <input id="price" type="number" min="0" step="0.01" required />
+          </div>
+
+          <div>
+            <label for="schedule">Schedule</label>
+            <select id="schedule" required>
+              <option value="7">Weekly</option>
+              <option value="14">Bi-Weekly</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="serviceDay">Service Day</label>
+            <select id="serviceDay" required>
+              <option>Monday</option>
+              <option>Tuesday</option>
+              <option>Wednesday</option>
+              <option>Thursday</option>
+              <option>Friday</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="firstDue">First Due Date</label>
+            <input id="firstDue" type="date" required />
+          </div>
+
+          <div class="full">
+            <button class="btn-green" type="submit">Add Customer</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title">All Customers</div>
+        <div id="customers" class="customers-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORK MODE -->
+  <div id="workMode" class="work-mode hidden">
+    <div class="work-card">
+      <h2>🚜 Work Day Mode</h2>
+      <div id="workProgress" class="work-progress"></div>
+      <div id="currentJob" class="work-job"></div>
+
+      <div class="actions">
+        <button class="btn-blue" onclick="navigateCurrent()">Navigate</button>
+        <button class="btn-green" onclick="completeCurrent()">Complete</button>
+        <button class="btn-yellow" onclick="skipCurrent()">Skip</button>
+        <button class="btn-red" onclick="exitWorkMode()">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PIN = "5316";
+    const STORAGE_KEY = "customers";
+
+    let customers = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    let workJobs = [];
+    let currentWorkIndex = 0;
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
+    }
+
+    function todayDate() {
+      return new Date().toISOString().split("T")[0];
+    }
+
+    function addDays(dateString, days) {
+      const d = new Date(dateString + "T12:00:00");
+      d.setDate(d.getDate() + Number(days));
+      return d.toISOString().split("T")[0];
+    }
+
+    function formatSchedule(schedule) {
+      return Number(schedule) === 7 ? "Weekly" : "Bi-Weekly";
+    }
+
+    function isDue(dateString) {
+      return new Date(dateString + "T23:59:59") <= new Date();
+    }
+
+    function navigateTo(address) {
+      const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+      window.open(url, "_blank");
+    }
+
+    function escapeSingleQuotes(str) {
+      return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+
+    function unlock() {
+      const pinInput = document.getElementById("pinInput").value;
+      const pinError = document.getElementById("pinError");
+
+      if (pinInput === PIN) {
+        document.getElementById("lockScreen").classList.add("hidden");
+        document.getElementById("app").classList.remove("hidden");
+        pinError.textContent = "";
+        render();
+      } else {
+        pinError.textContent = "Incorrect PIN";
+      }
+    }
+
+    document.getElementById("pinInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") unlock();
+    });
+
+    function render() {
+      const weekView = document.getElementById("weekView");
+      const todayJobs = document.getElementById("todayJobs");
+      const customersBox = document.getElementById("customers");
+      const incomeBox = document.getElementById("income");
+      const jobCount = document.getElementById("jobCount");
+
+      weekView.innerHTML = "";
+      todayJobs.innerHTML = "";
+      customersBox.innerHTML = "";
+
+      const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      const sortedCustomers = [...customers].sort((a, b) => new Date(a.nextDue) - new Date(b.nextDue));
+
+      let monthlyIncome = 0;
+      let todayCount = 0;
+
+      weekDays.forEach(day => {
+        const count = customers.filter(c => c.serviceDay === day).length;
+
+        const row = document.createElement("div");
+        row.className = "planner-row";
+        row.innerHTML = `
+          <div>${day}</div>
+          <div class="planner-count">${count} job${count === 1 ? "" : "s"}</div>
+        `;
+        weekView.appendChild(row);
+      });
+
+      sortedCustomers.forEach((c) => {
+        if (c.lastCut) {
+          const cutDate = new Date(c.lastCut + "T12:00:00");
+          const now = new Date();
+
+          if (
+            cutDate.getMonth() === now.getMonth() &&
+            cutDate.getFullYear() === now.getFullYear()
+          ) {
+            monthlyIncome += Number(c.price || 0);
+          }
+        }
+      });
+
+      incomeBox.textContent = monthlyIncome.toFixed(2);
+
+      if (sortedCustomers.length === 0) {
+        customersBox.innerHTML = `<div class="empty">No customers added yet.</div>`;
+      }
+
+      const dueCustomers = sortedCustomers
+        .map(customer => ({
+          customer,
+          originalIndex: customers.indexOf(customer)
+        }))
+        .filter(item => isDue(item.customer.nextDue));
+
+      todayCount = dueCustomers.length;
+      jobCount.textContent = todayCount;
+
+      if (todayCount === 0) {
+        todayJobs.innerHTML = `<div class="empty">No jobs due right now.</div>`;
+      } else {
+        dueCustomers.forEach(({ customer: c, originalIndex: i }) => {
+          const job = document.createElement("div");
+          job.className = "job-card";
+          job.innerHTML = `
+            <div class="customer-top">
+              <div>
+                <h3 class="customer-name">${c.name || "Unnamed Customer"}</h3>
+                <div class="badge-row">
+                  <span class="badge badge-blue">${formatSchedule(c.schedule)}</span>
+                  <span class="badge badge-green">${c.serviceDay || "No Day"}</span>
+                  <span class="badge badge-yellow">Due: ${c.nextDue}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="details">
+              <div><strong>Address:</strong> ${c.address || ""}</div>
+              <div><strong>Phone:</strong> ${c.phone || "-"}</div>
+              <div><strong>Price:</strong> $${Number(c.price || 0).toFixed(2)}</div>
+              <div><strong>Last Cut:</strong> ${c.lastCut || "Never"}</div>
+            </div>
+
+            <div class="actions">
+              <button class="btn-blue" onclick="navigateTo('${escapeSingleQuotes(c.address || "")}')">Navigate</button>
+              <button class="btn-green" onclick="completeCustomer(${i})">Complete</button>
+              <button class="btn-yellow" onclick="skipCustomer(${i})">Skip</button>
+            </div>
+          `;
+          todayJobs.appendChild(job);
+        });
+      }
+
+      sortedCustomers.forEach((c) => {
+        const i = customers.indexOf(c);
+        const card = document.createElement("div");
+        card.className = "customer-card";
+
+        const dueBadge = isDue(c.nextDue)
+          ? `<span class="badge badge-red">Due Now</span>`
+          : `<span class="badge badge-yellow">Next Due: ${c.nextDue}</span>`;
+
+        card.innerHTML = `
+          <div class="customer-top">
+            <div>
+              <h3 class="customer-name">${c.name || "Unnamed Customer"}</h3>
+              <div class="badge-row">
+                <span class="badge badge-blue">${formatSchedule(c.schedule)}</span>
+                <span class="badge badge-green">${c.serviceDay || "No Day"}</span>
+                ${dueBadge}
+              </div>
+            </div>
+          </div>
+
+          <div class="details">
+            <div><strong>Address:</strong> ${c.address || ""}</div>
+            <div><strong>Phone:</strong> ${c.phone || "-"}</div>
+            <div><strong>Price:</strong> $${Number(c.price || 0).toFixed(2)}</div>
+            <div><strong>Schedule:</strong> ${formatSchedule(c.schedule)}</div>
+            <div><strong>Service Day:</strong> ${c.serviceDay || "-"}</div>
+            <div><strong>Last Cut:</strong> ${c.lastCut || "Never"}</div>
+            <div><strong>Next Due:</strong> ${c.nextDue || "-"}</div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-blue" onclick="navigateTo('${escapeSingleQuotes(c.address || "")}')">Navigate</button>
+            <button class="btn-green" onclick="completeCustomer(${i})">Complete</button>
+            <button class="btn-yellow" onclick="skipCustomer(${i})">Skip</button>
+            <button class="btn-dark" onclick="editCustomer(${i})">Edit</button>
+            <button class="btn-red" onclick="deleteCustomer(${i})">Delete</button>
+          </div>
+        `;
+
+        customersBox.appendChild(card);
+      });
+    }
+
+    function completeCustomer(index) {
+      const today = todayDate();
+      customers[index].lastCut = today;
+      customers[index].nextDue = addDays(today, customers[index].schedule);
+      save();
+      render();
+    }
+
+    function skipCustomer(index) {
+      customers[index].nextDue = addDays(customers[index].nextDue, 7);
+      save();
+      render();
+    }
+
+    function deleteCustomer(index) {
+      if (confirm("Delete this customer?")) {
+        customers.splice(index, 1);
+        save();
+        render();
+      }
+    }
+
+    function editCustomer(index) {
+      const c = customers[index];
+
+      const name = prompt("Customer Name:", c.name ?? "");
+      if (name === null) return;
+
+      const address = prompt("Address:", c.address ?? "");
+      if (address === null) return;
+
+      const phone = prompt("Phone:", c.phone ?? "");
+      if (phone === null) return;
+
+      const price = prompt("Price:", c.price ?? "");
+      if (price === null) return;
+
+      const scheduleText = prompt("Schedule: type Weekly or Bi-Weekly", formatSchedule(c.schedule));
+      if (scheduleText === null) return;
+
+      const serviceDay = prompt("Service Day (Monday-Friday):", c.serviceDay ?? "");
+      if (serviceDay === null) return;
+
+      const nextDue = prompt("Next Due Date (YYYY-MM-DD):", c.nextDue ?? "");
+      if (nextDue === null) return;
+
+      let scheduleValue = c.schedule;
+      if (scheduleText.toLowerCase().includes("bi")) {
+        scheduleValue = 14;
+      } else if (scheduleText.toLowerCase().includes("week")) {
+        scheduleValue = 7;
+      }
+
+      customers[index] = {
+        ...customers[index],
+        name: name.trim(),
+        address: address.trim(),
+        phone: phone.trim(),
+        price: Number(price || 0),
+        schedule: scheduleValue,
+        serviceDay: serviceDay.trim(),
+        nextDue: nextDue.trim()
+      };
+
+      save();
+      render();
+    }
+
+    document.getElementById("customerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const customer = {
+        name: document.getElementById("name").value.trim(),
+        address: document.getElementById("address").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        price: Number(document.getElementById("price").value || 0),
+        schedule: Number(document.getElementById("schedule").value),
+        serviceDay: document.getElementById("serviceDay").value,
+        lastCut: null,
+        nextDue: document.getElementById("firstDue").value
+      };
+
+      customers.push(customer);
+      save();
+      render();
+      e.target.reset();
+    });
+
+    function getDueJobsForWorkMode() {
+      return customers
+        .map((customer, index) => ({ customer, index }))
+        .filter(item => isDue(item.customer.nextDue))
+        .sort((a, b) => new Date(a.customer.nextDue) - new Date(b.customer.nextDue));
+    }
+
+    function startWorkDay() {
+      workJobs = getDueJobsForWorkMode();
+      currentWorkIndex = 0;
+
+      if (workJobs.length === 0) {
+        alert("No jobs due today.");
+        return;
+      }
+
+      document.getElementById("app").classList.add("hidden");
+      document.getElementById("workMode").classList.remove("hidden");
+      showCurrentWorkJob();
+    }
+
+    function showCurrentWorkJob() {
+      const workProgress = document.getElementById("workProgress");
+      const currentJob = document.getElementById("currentJob");
+
+      if (currentWorkIndex >= workJobs.length) {
+        workProgress.textContent = "Finished";
+        currentJob.innerHTML = `
+          <h3 class="customer-name">🎉 All jobs completed!</h3>
+          <div class="details">
+            <div>You’re done for now.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const item = workJobs[currentWorkIndex];
+      const c = item.customer;
+
+      workProgress.textContent = `Job ${currentWorkIndex + 1} of ${workJobs.length}`;
+
+      currentJob.innerHTML = `
+        <h3 class="customer-name">${c.name || "Unnamed Customer"}</h3>
+
+        <div class="badge-row" style="margin-bottom:12px;">
+          <span class="badge badge-blue">${formatSchedule(c.schedule)}</span>
+          <span class="badge badge-green">${c.serviceDay || "No Day"}</span>
+          <span class="badge badge-yellow">Due: ${c.nextDue}</span>
+        </div>
+
+        <div class="details">
+          <div><strong>Address:</strong> ${c.address || ""}</div>
+          <div><strong>Phone:</strong> ${c.phone || "-"}</div>
+          <div><strong>Price:</strong> $${Number(c.price || 0).toFixed(2)}</div>
+          <div><strong>Last Cut:</strong> ${c.lastCut || "Never"}</div>
+        </div>
+      `;
+    }
+
+    function navigateCurrent() {
+      if (currentWorkIndex >= workJobs.length) return;
+      navigateTo(workJobs[currentWorkIndex].customer.address || "");
+    }
+
+    function completeCurrent() {
+      if (currentWorkIndex >= workJobs.length) return;
+      completeCustomer(workJobs[currentWorkIndex].index);
+      workJobs = getDueJobsForWorkMode();
+      showCurrentWorkJob();
+    }
+
+    function skipCurrent() {
+      if (currentWorkIndex >= workJobs.length) return;
+      skipCustomer(workJobs[currentWorkIndex].index);
+      workJobs = getDueJobsForWorkMode();
+      showCurrentWorkJob();
+    }
+
+    function exitWorkMode() {
+      document.getElementById("workMode").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+      render();
+    }
+  </script>
+</body>
+</html>
